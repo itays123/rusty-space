@@ -4,7 +4,7 @@ mod lindep;
 use lindep::Ratio;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Vector(f64, f64, f64);
+pub struct Vector(pub f64, pub f64, pub f64);
 
 impl Vector {
 
@@ -66,6 +66,16 @@ impl Mul for Vector {
     }
 }
 
+/// multiply a vector by a scalar
+impl Mul<Vector> for f64 {
+    type Output = Vector;
+
+    fn mul(self, rhs: Vector) -> Self::Output {
+        let Vector(x, y, z) = rhs;
+        Vector(self * x, self * y, self * z)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::f64::consts::PI;
@@ -88,6 +98,11 @@ mod tests {
     fn scalaric_product_works() {
         assert_eq!(Vector(0.0, 0.0, 1.0) * Vector(0.0, 1.0, 0.0), 0.0);
         assert_eq!(Vector(0.0, 0.0, 1.0) * Vector(0.0, 1.0, 1.0), 1.0);
+    }
+
+    #[test]
+    fn multiply_by_scalar() {
+        assert_eq!(2.0 * Vector(1.0, 2.0, 3.0), Vector(2.0, 4.0, 6.0));
     }
 
     #[test]
