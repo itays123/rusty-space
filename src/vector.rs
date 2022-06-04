@@ -57,13 +57,37 @@ impl Mul for Vector {
 }
 
 #[cfg(test)]
-mod vector_test {
+mod tests {
     use super::*;
 
-    /// Test the sum of two vectors
     #[test]
-    fn sum_test() {
+    fn sum_works() {
         assert_eq!(Vector(0_f64, 0_f64, 1_f64) + Vector(0_f64, 1_f64, 0_f64), Vector(0_f64, 1_f64, 1_f64));
         assert_eq!(Vector(0_f64, 0_f64, 1_f64) + Vector(0_f64, 1_f64, 1_f64), Vector(0_f64, 1_f64, 2_f64));
+    }
+
+    #[test]
+    fn subtract_works() {
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64) - Vector(0_f64, 1_f64, 0_f64), Vector(0_f64, -1_f64, 1_f64)); 
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64) - Vector(0_f64, 1_f64, 1_f64), Vector(0_f64, -1_f64, 0_f64));
+    }
+
+    #[test]
+    fn scalaric_product_works() {
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64) * Vector(0_f64, 1_f64, 0_f64), 0_f64);
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64) * Vector(0_f64, 1_f64, 1_f64), 1_f64);
+    }
+
+    #[test]
+    fn length_works() {
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64).length(), 1_f64);
+        assert_eq!(Vector(2_f64, 2_f64, 1_f64).length(), 3_f64);
+    }
+
+    #[test]
+    fn dependency_works() {
+        assert!(Vector(0_f64, 0_f64, 1_f64).is_lindep(Vector(0_f64, 0_f64, 2_f64)));
+        assert!(!Vector(0_f64, 0_f64, 1_f64).is_lindep(Vector(0_f64, 1_f64, 2_f64)));
+        assert!(Vector(2_f64, 2_f64, 1_f64).is_lindep(Vector(4_f64, 4_f64, 2_f64)));
     }
 }
