@@ -63,6 +63,7 @@ mod vector_test {
     /// Test the sum of two vectors
     #[test]
     fn sum_test() {
-        assert_eq!(Vector(0_f64, 0_f64, 1_f64) + Vector(0_f64, 1_f64, 0_f64), Vector(0_f64, 1_f64, 1_f64))
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64) + Vector(0_f64, 1_f64, 0_f64), Vector(0_f64, 1_f64, 1_f64));
+        assert_eq!(Vector(0_f64, 0_f64, 1_f64) + Vector(0_f64, 1_f64, 1_f64), Vector(0_f64, 1_f64, 2_f64));
     }
 }
