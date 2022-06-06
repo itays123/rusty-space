@@ -2,8 +2,9 @@
 
 use std::f64::consts::PI;
 
-use crate::{vector::Vector, line::Line};
+use crate::{vector::Vector, line::{Line, relations::LineRelations}};
 
+#[derive(PartialEq, Debug)]
 pub struct Plain {
     plumb: Vector,
     constant_d: f64
@@ -23,14 +24,20 @@ impl Plain {
         Plain { plumb, constant_d }
     }
 
-    /// Generates a plain from intersecting lines
+    /// Generates a plain from intersecting or parallel lines
     /// # Panics:
     /// - If the two lines provided are not intersecting and cannot form a plain
-    pub fn from_intersecting_lines(line1: &Line, line2: &Line) -> Plain {
-        if let Some(intersection) = Line::intersection(line1, line2) {
-            Plain::new(&intersection, &line1.direction, &line2.direction)
-        } else {
-            panic!("Lines don't intersect");
+    pub fn from_two_lines(line1: &Line, line2: &Line) -> Plain {
+        match LineRelations::of(line1, line2) {
+            LineRelations::Parallel(_) => {
+                let dir2 = line2.point - line1.point;
+                Plain::new(&line1.point, &line1.direction, &dir2)
+            },
+            LineRelations::Intersect(intersection, _) => {
+                Plain::new(&intersection, &line1.direction, &line2.direction)
+            },
+            LineRelations::Unite => panic!("Lines unite and form infinite shared planes!"),
+            LineRelations::Foreign(_, _) => panic!("Forign lines have no common plane!")
         }
     }
 
@@ -83,5 +90,62 @@ impl Plain {
         } else {
             angle
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn creates_new_plain() {
+        let plain = Plain::new(&Vector(0.0,0.0,0.0), &Vector(1.0, 0.0, 0.0), &Vector(0.0, 1.0, 0.0)); // z=0
+        assert_eq!(plain.plumb, Vector(0.0, 0.0, 1.0));
+        assert_eq!(plain.constant_d, 0.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn creates_new_plain_lindep_dirs() {
+        Plain::new(&Vector(0.0,0.0,0.0), &Vector(1.0, 0.0, 0.0), &Vector(2.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn creates_new_from_intersection() {
+        let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
+        let line2 = Line::new(Vector(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0)); // the y axis
+        let plain = Plain::from_two_lines(&line1, &line2);
+        assert_eq!(plain.plumb, Vector(0.0, 0.0, 1.0));
+        assert_eq!(plain.constant_d, 0.0);
+    }
+
+    #[test]
+    fn creates_new_from_parallel() {
+        let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
+        let line2 = Line::new(Vector(0.0, 1.0, 0.0), Vector(1.0, 0.0, 0.0)); // the y axis
+        let plain = Plain::from_two_lines(&line1, &line2);
+        assert_eq!(plain.plumb, Vector(0.0, 0.0, 1.0));
+        assert_eq!(plain.constant_d, 0.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn creates_new_plain_foreign_lines() {
+        let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
+        let line2 = Line::new(Vector(0.0, 0.0, 1.0), Vector(0.0, 1.0, 0.0)); // the y axis
+        Plain::from_two_lines(&line1, &line2);
+    }
+
+    #[test]
+    fn creates_new_from_3_points() {
+        let plain = Plain::from_three_points(&Vector(0.0,0.0,0.0), &Vector(1.0, 0.0, 0.0), &Vector(0.0, 1.0, 0.0)); // z=0
+        assert_eq!(plain.plumb, Vector(0.0, 0.0, 1.0));
+        assert_eq!(plain.constant_d, 0.0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn creates_new_from_3_points_same_line() {
+        Plain::from_three_points(&Vector(0.0,0.0,0.0), &Vector(1.0, 0.0, 0.0), &Vector(3.0, 0.0, 0.0)); // z=0
     }
 }

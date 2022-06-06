@@ -6,7 +6,7 @@ use crate::equation::EquationSolution;
 
 use self::relations::LineRelations;
 
-mod relations;
+pub mod relations;
 pub struct Line {
     pub point: Vector,
     pub direction: Vector    
