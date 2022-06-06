@@ -9,14 +9,14 @@ pub struct Vector(pub f64, pub f64, pub f64);
 impl Vector {
 
     /// The mathematical length of a vector
-    pub fn length(self) -> f64 {
-        (self * self).sqrt()
+    pub fn length(&self) -> f64 {
+        ((*self) * (*self)).sqrt()
     }
 
     /// Check if two vectors are linearly dependent
-    pub fn is_lindep(self, other: Vector) -> bool {
-        let Vector(u1, u2, u3) = self;
-        let Vector(v1, v2, v3) = other;
+    pub fn is_lindep(&self, other: &Vector) -> bool {
+        let Vector(u1, u2, u3) = *self;
+        let Vector(v1, v2, v3) = *other;
         
         let ratio1 = Ratio::compute(u1, v1);
         let ratio2 = Ratio::compute(u2, v2);
@@ -27,14 +27,14 @@ impl Vector {
     }
 
     /// Compute the angle between two vectors, in radians
-    pub fn angle_between(u: Vector, v: Vector) -> f64 {
-        ((u * v) / (u.length() * v.length())).acos()
+    pub fn angle_between(u: &Vector, v: &Vector) -> f64 {
+        (((*u) * (*v)) / (u.length() * v.length())).acos()
     }
 
     /// Compute a vector that is perpendicular to two given vectors
-    pub fn vectoric_product(u: Vector, v: Vector) -> Vector {
-        let Vector(u1, u2, u3) = u;
-        let Vector(v1, v2, v3) = v;
+    pub fn vectoric_product(u: &Vector, v: &Vector) -> Vector {
+        let Vector(u1, u2, u3) = *u;
+        let Vector(v1, v2, v3) = *v;
         Vector(u2 * v3 - u3 * v2, u3 * v1 - u1 * v3, u1 * v2 - u2 * v1)
     }
 }
@@ -113,20 +113,20 @@ mod tests {
 
     #[test]
     fn dependency_works() {
-        assert!(Vector(0.0, 0.0, 1.0).is_lindep(Vector(0.0, 0.0, 2.0)));
-        assert!(!Vector(0.0, 0.0, 1.0).is_lindep(Vector(0.0, 1.0, 2.0)));
-        assert!(Vector(2.0, 2.0, 1.0).is_lindep(Vector(4.0, 4.0, 2.0)));
+        assert!(Vector(0.0, 0.0, 1.0).is_lindep(&Vector(0.0, 0.0, 2.0)));
+        assert!(!Vector(0.0, 0.0, 1.0).is_lindep(&Vector(0.0, 1.0, 2.0)));
+        assert!(Vector(2.0, 2.0, 1.0).is_lindep(&Vector(4.0, 4.0, 2.0)));
     }
 
     #[test]
     fn angle_works() {
         const EPSILON: f64 = 0.00001;
-        assert_eq!(Vector::angle_between(Vector(0.0, 0.0, 1.0), Vector(0.0, 1.0, 0.0)), PI / 2.0);
-        assert!((Vector::angle_between(Vector(0.0, 0.0, 1.0), Vector(0.0, 1.0, 1.0)) - PI / 4.0).abs() < EPSILON);
+        assert_eq!(Vector::angle_between(&Vector(0.0, 0.0, 1.0), &Vector(0.0, 1.0, 0.0)), PI / 2.0);
+        assert!((Vector::angle_between(&Vector(0.0, 0.0, 1.0), &Vector(0.0, 1.0, 1.0)) - PI / 4.0).abs() < EPSILON);
     }
 
     #[test]
     fn vectoric_product_works() {
-        assert!(Vector::vectoric_product(Vector(0.0, 0.0, 1.0), Vector(0.0, 1.0, 0.0)).is_lindep(Vector(1.0, 0.0, 0.0)));
+        assert!(Vector::vectoric_product(&Vector(0.0, 0.0, 1.0), &Vector(0.0, 1.0, 0.0)).is_lindep(&Vector(1.0, 0.0, 0.0)));
     }
 }
