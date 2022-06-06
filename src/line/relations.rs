@@ -1,5 +1,6 @@
 //! A module to describe a relation between two lines
 
+use crate::plain::Plain;
 use crate::vector::Vector;
 use crate::line::Line;
 
@@ -31,7 +32,11 @@ impl LineRelations {
                 // found a point that is on both lines
                 Self::Intersect(intersection, angle)
             } else {
-                Self::Foreign(0.0, angle)
+                // lines are foreign. Calculate the distance between them
+                // Create a plain with the origin of the first line and the directions of the two
+                let common_plain = Plain::new(&line1.point, &line1.direction, &line2.direction);
+                let distance = common_plain.distance_from(&line2.point);
+                Self::Foreign(distance, angle)
             }
         }
     }
@@ -62,5 +67,12 @@ mod tests {
         let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
         let line2 = Line::new(Vector(0.0, 0.0, 0.0), Vector(-1.0, 1.0, 0.0));
         assert_eq!(LineRelations::of(&line1, &line2), LineRelations::Intersect(Vector(0.0, 0.0, 0.0), PI / 4.0));
+    }
+
+    #[test]
+    fn foreign_lines() {
+        let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
+        let line2 = Line::new(Vector(0.0, 1.0, 0.0), Vector(0.0, 0.0, 1.0));
+        assert_eq!(LineRelations::of(&line1, &line2), LineRelations::Foreign(1.0, PI / 2.0))
     }
 }

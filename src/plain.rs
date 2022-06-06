@@ -23,13 +23,33 @@ impl Plain {
         Plain { plumb, constant_d }
     }
 
+    /// Generates a plain from intersecting lines
+    /// # Panics:
+    /// - If the two lines provided are not intersecting and cannot form a plain
+    pub fn from_intersecting_lines(line1: &Line, line2: &Line) -> Plain {
+        if let Some(intersection) = Line::intersection(line1, line2) {
+            Plain::new(&intersection, &line1.direction, &line2.direction)
+        } else {
+            panic!("Lines don't intersect");
+        }
+    }
+
+    /// Generates a plain from three points
+    /// # Panics:
+    /// - If the three points provided form a line and not a plain
+    pub fn from_three_points(point1: &Vector, point2: &Vector, point3: &Vector) -> Plain {
+        let dir1 = *point2 - *point1;
+        let dir2 = *point3 - *point1;
+        Plain::new(point1, &dir1, &dir2)
+    }
+
     fn compute(&self, point: &Vector) -> f64 {
         self.plumb * (*point) + self.constant_d
     }
 
     // Calculate distance between a given point and this plain
     pub fn distance_from(&self, point: &Vector) -> f64 {
-        self.compute(point) / self.plumb.length()
+        self.compute(point).abs() / self.plumb.length()
     }
 
     // Check if the plain contains a given point
@@ -53,5 +73,15 @@ impl Plain {
         let angle = self.angle_with_vector(&line.direction);
         // angle between lines must be between 0 and 90 degrees
         angle.abs()
+    }
+
+    // Compute the angle (0 <= x <= PI/2) between two plains
+    pub fn angle_between(plain1: &Plain, plain2: &Plain) -> f64 {
+        let angle = Vector::angle_between(&plain1.plumb, &plain2.plumb);
+        if angle > PI / 2.0 {
+            PI - angle
+        } else {
+            angle
+        }
     }
 }

@@ -4,6 +4,8 @@ use std::f64::consts::PI;
 use crate::vector::Vector;
 use crate::equation::EquationSolution;
 
+use self::relations::LineRelations;
+
 mod relations;
 pub struct Line {
     pub point: Vector,
@@ -86,7 +88,7 @@ impl Line {
 
 impl PartialEq for Line {
     fn eq(&self, other: &Self) -> bool {
-        self.point == other.point && self.direction == other.direction
+        LineRelations::of(self, other) == LineRelations::Unite
     }
 }
 
