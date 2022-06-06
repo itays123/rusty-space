@@ -1,5 +1,4 @@
 //! A module to describe a relation between two lines
-use std::f64::consts::PI;
 
 use crate::vector::Vector;
 use crate::line::Line;
@@ -26,19 +25,22 @@ impl LineRelations {
         }
         else {
             // lines either collide or intersect
-            let mut angle = Vector::angle_between(&line1.direction, &line2.direction);
-            // angle between lines must be between 0 and 90 degrees
-            if angle > PI / 2.0 {
-                angle = PI - angle;
+            let angle = Line::angle_between(line1, line2);
+
+            if let Some(intersection) = Line::intersection(line1, line2) {
+                // found a point that is on both lines
+                Self::Intersect(intersection, angle)
+            } else {
+                Self::Foreign(0.0, angle)
             }
-            // find a point that is on both lines
-            Self::Foreign(0.0, angle)
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
     use super::*;
 
     #[test]
@@ -53,5 +55,12 @@ mod tests {
         let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0));
         let line2 = Line::new(Vector(0.0, 1.0, 0.0), Vector(1.0, 0.0, 0.0));
         assert_eq!(LineRelations::of(&line1, &line2), LineRelations::Parallel(1.0))
+    }
+
+    #[test]
+    fn intersecting_lines() {
+        let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
+        let line2 = Line::new(Vector(0.0, 0.0, 0.0), Vector(-1.0, 1.0, 0.0));
+        assert_eq!(LineRelations::of(&line1, &line2), LineRelations::Intersect(Vector(0.0, 0.0, 0.0), PI / 4.0));
     }
 }
