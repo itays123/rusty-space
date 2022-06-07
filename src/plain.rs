@@ -176,15 +176,18 @@ mod tests {
         assert_eq!(plain.distance_from(&Vector(0.0, 0.0, 1.0)), 1.0);
     }
 
+    #[test]
     fn angles_with_vector_and_line() {
+        const EPSILON: f64 = 0.0001;
         let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
         let line2 = Line::new(Vector(0.0, 1.0, 0.0), Vector(1.0, 0.0, 0.0)); // the y axis
         let plain = Plain::from_two_lines(&line1, &line2);
         let line3 = Line::new(Vector(0.0, 0.0, 0.0), Vector(-1.0, 0.0, 1.0));
-        assert_eq!(plain.angle_with_vector(&line3.direction), 3.0 * PI / 4.0);
-        assert_eq!(plain.angle_with_line(&line3), PI / 4.0);
+        assert!(plain.angle_with_vector(&line3.direction) - PI / 4.0 < EPSILON);
+        assert!(plain.angle_with_line(&line3) - PI / 4.0 < EPSILON);
     }
 
+    #[test]
     fn angle_between_plains() {
         let line1 = Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0)); // the x axis
         let line2 = Line::new(Vector(0.0, 0.0, 0.0), Vector(0.0, 1.0, 0.0)); // the y axis

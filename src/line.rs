@@ -53,14 +53,25 @@ impl Line {
         // for dimension x: xp1 + t * xu1 = xp2 + s * xu2
         // simplify: t * xu1 - s * xu2 = xp2 - xp1;
         // therefore, for the entire vector: tu1 - su2 = p2 - p1;
-        let Vector(constx, consty, _) = line2.point - line1.point;
-        let Vector(coefficient_tx, coefficient_ty, _) = line1.direction;
-        let Vector(coefficient_sx, coefficient_sy, _) = line2.direction;
+        let Vector(constx, consty, constz) = line2.point - line1.point;
+        let Vector(coefficient_tx, coefficient_ty, coefficient_tz) = line1.direction;
+        let Vector(coefficient_sx, coefficient_sy, coefficient_sz) = line2.direction;
 
         // solve for t and s
         let eq1 = (coefficient_tx, -coefficient_sx, constx);
         let eq2 = (coefficient_ty, -coefficient_sy, consty);
-        if let Some((t, s)) = EquationSolution::compute_multiple(eq1, eq2) {
+        let eq3 = (coefficient_tz, -coefficient_sz, constz);
+
+        let result: Option<(f64, f64)>;
+        if eq1 == (0.0, 0.0, 0.0) { // plane containing the lines is vertical to the x axis 
+            result = EquationSolution::compute_multiple(eq3, eq2)
+        } else if eq2 == (0.0, 0.0, 0.0) { // plane containing the lines is vertical to the y axis 
+            result = EquationSolution::compute_multiple(eq1, eq3);
+        } else {
+            result = EquationSolution::compute_multiple(eq1, eq2);
+        }
+
+        if let Some((t, s)) = result {
             // check for z
             let intersection_t = line1.point + t * line1.direction;
             let intersection_s = line2.point + s * line2.direction;
