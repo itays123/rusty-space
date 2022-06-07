@@ -1,8 +1,12 @@
 //! Represents plains in a 3d space
 
+pub mod line_relations;
+
 use std::f64::consts::PI;
 
-use crate::{vector::Vector, line::{Line, relations::LineRelations}};
+use crate::{vector::Vector, line::{Line, relations::LineRelations}, equation::EquationSolution};
+
+use self::line_relations::PlainLineRelations;
 
 #[derive(PartialEq, Debug)]
 pub struct Plain {
@@ -54,35 +58,35 @@ impl Plain {
         self.plumb * (*point) + self.constant_d
     }
 
-    // Calculate distance between a given point and this plain
+    /// Calculate distance between a given point and this plain
     pub fn distance_from(&self, point: &Vector) -> f64 {
         self.compute(point).abs() / self.plumb.length()
     }
 
-    // Check if the plain contains a given point
+    /// Check if the plain contains a given point
     pub fn contains_point(&self, point: &Vector) -> bool {
         self.compute(point) == 0.0
     }
 
-    // Check if a plain contains a given line
+    /// Check if a plain contains a given line
     pub fn contains_line(&self, line: &Line) -> bool {
         // Point is on line, and the direction of the line is vertical to the plumb
         self.contains_point(&line.point) && (line.direction * self.plumb == 0.0) 
     }
 
-    // Compute the angle between the plain and a given vector
+    /// Compute the angle between the plain and a given vector
     pub fn angle_with_vector(&self, vector: &Vector) -> f64 {
         (PI / 2.0) - Vector::angle_between(&self.plumb, vector)
     }
 
-    // Compute the angle (0 <= x <= PI / 2) between the plain and a given line
+    /// Compute the angle (0 <= x <= PI / 2) between the plain and a given line
     pub fn angle_with_line(&self, line:&Line) -> f64 {
         let angle = self.angle_with_vector(&line.direction);
         // angle between lines must be between 0 and 90 degrees
         angle.abs()
     }
 
-    // Compute the angle (0 <= x <= PI/2) between two plains
+    /// Compute the angle (0 <= x <= PI/2) between two plains
     pub fn angle_between(plain1: &Plain, plain2: &Plain) -> f64 {
         let angle = Vector::angle_between(&plain1.plumb, &plain2.plumb);
         if angle > PI / 2.0 {
@@ -91,6 +95,31 @@ impl Plain {
             angle
         }
     }
+
+    /// Compute the relation between a plane and a line
+    pub fn relation_with_line(&self, line: &Line) -> PlainLineRelations {
+        // Find a point on the line, p1 = p + tu, such that compute(p1) == 0
+        // Simplify: plumb * p1 + d = 0
+        // plumb * (p + tu) + d = 0
+        // t * (plumb * u) + d + plumb * p = 0
+        let coefficient = self.plumb * line.direction;
+        let constant = self.plumb * line.point + self.constant_d;
+        match EquationSolution::compute(coefficient, constant) {
+            EquationSolution::Real(t) => {
+                let intersection = line.point + t * line.direction;
+                let angle = self.angle_with_line(line);
+                PlainLineRelations::Intersect(intersection, angle)
+            },
+            EquationSolution::None => {
+                // No intersection -> Parallel
+                let distance = self.distance_from(&line.point);
+                PlainLineRelations::Parallel(distance)
+            }
+            EquationSolution::Undefined => PlainLineRelations::Containing
+        }
+    }
+
+
 }
 
 #[cfg(test)]
