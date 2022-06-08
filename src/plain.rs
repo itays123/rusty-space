@@ -2,6 +2,7 @@
 
 pub mod line_relations;
 pub mod relations;
+mod intersection;
 
 use std::f64::consts::PI;
 
@@ -134,6 +135,33 @@ impl Plain {
         let d2 = d2 * plumb_ratio;
         let difference = (d1 - d2).abs();
         difference / plumb1.length()
+    }
+
+    /// Compute an intersection line of two planes
+    /// # Panics:
+    /// - If the two planes unite or parallel and therefore cannot form a line
+    pub fn intersection_line_of(plain1: &Plain, plain2: &Plain) -> Line {
+        if plain1.plumb.is_lindep(&plain2.plumb) {
+            panic!("The two planes can't be parallel or uniting to calculate the intersection between them")
+        }
+
+        // given two plains: 
+        // ax + by + cz + d1 = 0
+        // mx + ny + kz + d2 = 0
+        // the target is to find an equation for two of the three dimensions using the third one.
+        // such as: z = 2x + 4, y = 3x + 8
+        // then, we substitute x=0, x=1 and we have two points that we can use to form a line.
+        
+        // special case: two of the params a,b,c (or m,n,k) is 0
+        // i.e z = 4, subsitute immediately without solving
+
+        // special case: one of the params a,b,c (or m,n,k) is 0
+        // i.e: x + y + 3 = 0 => y = -x - 3, no need to solve a special equation.
+
+        // default case: none of the params is 0 (all values being 0 is not mathematically possible)
+        // i.e: x + y + z + 4 = 0, 2x - 3y + 5z - 8 = 0
+
+        Line::new(Vector(0.0, 0.0, 0.0), Vector(1.0, 0.0, 0.0))
     }
 
 
