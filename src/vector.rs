@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub, Mul};
+use std::ops::{Add, Sub, Mul, Div};
 
 mod lindep;
 use lindep::Ratio;
@@ -15,15 +15,8 @@ impl Vector {
 
     /// Check if two vectors are linearly dependent
     pub fn is_lindep(&self, other: &Vector) -> bool {
-        let Vector(u1, u2, u3) = *self;
-        let Vector(v1, v2, v3) = *other;
-        
-        let ratio1 = Ratio::compute(u1, v1);
-        let ratio2 = Ratio::compute(u2, v2);
-        let ratio3 = Ratio::compute(u3, v3);
-
-        ratio1 == ratio2 && ratio1 == ratio3 && ratio2 == ratio3
-
+        let division = *self / *other;
+        division.is_ok()
     }
 
     /// Compute the angle between two vectors, in radians
@@ -76,6 +69,34 @@ impl Mul<Vector> for f64 {
     }
 }
 
+
+impl Div for Vector {
+    type Output = Result<f64, ()>;
+
+    /// Calculate ratio of linearly dependent vectors. 
+    /// Fail if vectors are not linearly dependent
+    fn div(self, rhs: Self) -> Self::Output {
+        let Vector(u1, u2, u3) = self;
+        let Vector(v1, v2, v3) = rhs;
+        
+        let ratio1 = Ratio::compute(u1, v1);
+        let ratio2 = Ratio::compute(u2, v2);
+        let ratio3 = Ratio::compute(u3, v3);
+
+        if !(ratio1 == ratio2 && ratio1 == ratio3 && ratio2 == ratio3) {
+            // vectors not linearly dependent
+            return Err(());
+        }
+
+        match (ratio1, ratio2, ratio3) {
+            (Ratio::Real(r), _, _) | (_, Ratio::Real(r), _) | (_, _, Ratio::Real(r)) => Ok(r),
+            _ => Err(())
+        }
+    }
+
+    
+}
+
 #[cfg(test)]
 mod tests {
     use std::f64::consts::PI;
@@ -103,6 +124,14 @@ mod tests {
     #[test]
     fn multiply_by_scalar() {
         assert_eq!(2.0 * Vector(1.0, 2.0, 3.0), Vector(2.0, 4.0, 6.0));
+    }
+
+    #[test]
+    fn linear_ratio() {
+        assert_eq!((Vector(2.0, 4.0, 6.0) / Vector(1.0, 2.0, 3.0)).unwrap(), 2.0);
+        assert_eq!((Vector(2.0, 0.0, 6.0) / Vector(1.0, 0.0, 3.0)).unwrap(), 2.0);
+        assert_eq!((Vector(2.0, 0.0, 0.0) / Vector(1.0, 0.0, 0.0)).unwrap(), 2.0);
+        assert!((Vector(2.0, 0.0, 1.0) / Vector(1.0, 0.0, 0.0)).is_err());
     }
 
     #[test]

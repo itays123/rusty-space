@@ -1,6 +1,7 @@
 //! Represents plains in a 3d space
 
 pub mod line_relations;
+pub mod relations;
 
 use std::f64::consts::PI;
 
@@ -117,6 +118,22 @@ impl Plain {
             }
             EquationSolution::Undefined => PlainLineRelations::Containing
         }
+    }
+
+    /// Compute a constant distance between plains.
+    /// # Panics:
+    /// - If the two plains provided intersect, they don't have a constant distance between them.
+    pub fn distance_between(plain1: &Plain, plain2: &Plain) -> f64 {
+        if plain1.plumb.is_lindep(&plain2.plumb) {
+            panic!("The two planes must be parallel or uniting to calculate the distance between them")
+        }
+
+        let (d1, plumb1) = (plain1.constant_d, &plain1.plumb);
+        let (d2, plumb2) = (plain2.constant_d, &plain2.plumb);
+        let plumb_ratio = (*plumb1 / *plumb2).unwrap();
+        let d2 = d2 * plumb_ratio;
+        let difference = (d1 - d2).abs();
+        difference / plumb1.length()
     }
 
 
