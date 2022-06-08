@@ -124,7 +124,7 @@ impl Plain {
     /// # Panics:
     /// - If the two plains provided intersect, they don't have a constant distance between them.
     pub fn distance_between(plain1: &Plain, plain2: &Plain) -> f64 {
-        if plain1.plumb.is_lindep(&plain2.plumb) {
+        if !plain1.plumb.is_lindep(&plain2.plumb) {
             panic!("The two planes must be parallel or uniting to calculate the distance between them")
         }
 
@@ -215,11 +215,18 @@ mod tests {
     }
 
     #[test]
-    fn distance() {
+    fn distance_from_points() {
         let origin = Vector(0.0,0.0,0.0);
         let plain = Plain::from_three_points(&origin, &Vector(1.0, 0.0, 0.0), &Vector(0.0, 1.0, 0.0)); // z=0
         assert_eq!(plain.distance_from(&origin), 0.0);
         assert_eq!(plain.distance_from(&Vector(0.0, 0.0, 1.0)), 1.0);
+    }
+
+    #[test]
+    fn distance_between_plains() {
+        let plain1 = Plain::from_three_points(&Vector(0.0,0.0,0.0), &Vector(1.0, 0.0, 0.0), &Vector(0.0, 1.0, 0.0)); // z=0
+        let plain2 = Plain::from_three_points(& Vector(0.0,0.0,1.0), &Vector(1.0, 0.0, 1.0), &Vector(1.0, 1.0, 1.0)); // z=1
+        assert_eq!(Plain::distance_between(&plain1, &plain2), 1.0);
     }
 
     #[test]
