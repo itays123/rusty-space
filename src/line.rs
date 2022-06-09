@@ -2,7 +2,7 @@
 
 use std::f64::consts::PI;
 use crate::vector::Vector;
-use crate::equation::EquationSolution;
+use crate::math::equation::EquationSolution;
 
 use self::relations::LineRelations;
 
@@ -18,6 +18,11 @@ impl Line {
     
     pub fn new(point: Vector, direction: Vector) -> Line {
         Line { point, direction }
+    }
+
+    pub fn from_two_points(origin: Vector, other_point: &Vector) -> Self {
+        let direction = *other_point - origin;
+        Self::new(origin, direction)
     }
 
     pub fn is_on_line(&self, other_point: &Vector) -> bool {

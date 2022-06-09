@@ -1,7 +1,6 @@
 use std::ops::{Add, Sub, Mul, Div};
 
-mod lindep;
-use lindep::Ratio;
+use crate::math::ratio::Ratio;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vector(pub f64, pub f64, pub f64);

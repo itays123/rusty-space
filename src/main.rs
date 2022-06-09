@@ -1,7 +1,7 @@
 mod vector;
 mod line;
-mod equation;
 mod plain;
+mod math;
 
 fn main() {
     println!("Hello, world!");

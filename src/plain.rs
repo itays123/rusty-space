@@ -6,7 +6,7 @@ mod intersection;
 
 use std::f64::consts::PI;
 
-use crate::{vector::Vector, line::{Line, relations::LineRelations}, equation::EquationSolution};
+use crate::{vector::Vector, line::{Line, relations::LineRelations}, math::equation::EquationSolution};
 
 use self::line_relations::PlainLineRelations;
 
