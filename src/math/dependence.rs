@@ -191,18 +191,18 @@ impl SingleScalarDependence {
         };
 
         let (value1, value2) = (dep1.put(value), dep2.put(value));
-        let mut valueMap: HashMap<Dimension, f64> = HashMap::new();
-        valueMap.insert(source, value);
-        valueMap.insert(dep1.source, value1);
-        valueMap.insert(dep2.source, value2);
+        let mut value_map: HashMap<Dimension, f64> = HashMap::new();
+        value_map.insert(source, value);
+        value_map.insert(dep1.source, value1);
+        value_map.insert(dep2.source, value2);
 
-        if valueMap.len() != 3 {
+        if value_map.len() != 3 {
             panic!("Could not assemble a point");
         }
 
-        let x = valueMap.get(&X).unwrap_or_else(|| valueMap.get(&Dimension::None).unwrap());
-        let y = valueMap.get(&Y).unwrap_or_else(|| valueMap.get(&Dimension::None).unwrap());
-        let z = valueMap.get(&Z).unwrap_or_else(|| valueMap.get(&Dimension::None).unwrap());
+        let x = value_map.get(&X).unwrap_or_else(|| value_map.get(&Dimension::None).unwrap());
+        let y = value_map.get(&Y).unwrap_or_else(|| value_map.get(&Dimension::None).unwrap());
+        let z = value_map.get(&Z).unwrap_or_else(|| value_map.get(&Dimension::None).unwrap());
 
         Vector(*x, *y, *z)
 
